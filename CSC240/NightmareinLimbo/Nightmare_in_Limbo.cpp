@@ -23,15 +23,19 @@ class Room {
 	        string name;
 	        string descr;
 	        int numDoors;
+			int xCoords;
+			int yCoords;
 	        
 	public:
 		//pointers to 4 rooms (one for each possibe connection)
 		Room *p[4];
 		
 		//allows us to initialize the name and description of rooms
-		virtual void init(string n, string descript){
+		virtual void init(string n, string descript, int x, int y){
 			name = n;
 			descr = descript;
+			xCoords = x;
+			yCoords = y;
 		}
 		
 		//used to set array of 4 pointers
@@ -39,6 +43,23 @@ class Room {
 		
 		int getDoors(){
 			return numDoors;
+		}
+		
+		void getDoorsCoords(){
+			for(int i = 0; i < numDoors; i++){
+				int xDiff = xCoords - p[i]->xCoords;
+				int yDiff = yCoords - p[i]->yCoords;
+				
+				if(yDiff < 0){
+					cout<< i+1 << ". North\n";
+				} else if(xDiff < 0){
+					cout<< i+1 << ". East\n";
+				} else if(yDiff > 0){
+					cout<< i+1 << ". South\n";
+				} else if(xDiff > 0){
+					cout<< i+1 << ". West\n";
+				} 
+			}
 		}
 		
 		//displays when entering rooms
@@ -167,10 +188,12 @@ class ItemRoom: public Room {
 	public:
 		Item *item;
 		
-		void init(string n, string descript, Item *i){
+		void init(string n, string descript, Item *i, int x, int y){
 			name = n;
 			descr = descript;
 			item = i;
+			xCoords = x;
+			yCoords = y;
 		}
 		
 		//gives player item
@@ -196,10 +219,12 @@ class NpcRoom: public Room {
 	string NpcTalk;
 	
 	public:
-		void init(string n, string descript, string npc){
+		void init(string n, string descript, string npc, int x, int y){
 			name = n;
 			descr = descript;
 			NpcTalk = npc;
+			xCoords = x;
+			yCoords = y;
 		}
 		
 		//displays basic descrption for rooms with npc
@@ -247,7 +272,7 @@ void defineRooms(){
 		     "  You notice that the table you are on is covered in old blood stains. With a heavy head, you slowly get off the table.\n"
 		     "  You realise that the room has one door on the front side of the table. On the other two sides,\n"
 		     "  there appears to be a bunch of powertools. Nothing you would expect to see in a medical setting.\n\n";
-	medical_Exam.init("Medical Examination Room", descript);
+	medical_Exam.init("Medical Examination Room", descript, 1, 0);
 	medical_Exam.setDoors(&medical_Office);
 	
 	descript = "\n  There are two doors in this room. The room is full of desks, filing cabnets and things alike. The ghost in\n"
@@ -263,15 +288,15 @@ void defineRooms(){
 		"  back, but you also need to the exit to this place before the night is over. AHHH! Mildred is still around here\n"
 		"  somewhere, and be warned, if she catches you, you will be dead, like dead dead. Hehehe I think she is trying to\n"
 		"  figure out a way to cure death. AHHH! Zombies, skellies, and ghosties. AHHH! I'm a ghostie! Hehehe\"\n\n";
-	medical_Office.init("Medical Office", descript, npc);
-	medical_Office.setDoors(&medical_Exam, &kitchen);
+	medical_Office.init("Medical Office", descript, npc, 1, 1);
+	medical_Office.setDoors(&kitchen, &medical_Exam);
 	
 	descript = "\n  There are four doors in this room. The kitchen looks like one you might find in a resturant.\n\n";
-	kitchen.init("Kitchen", descript, &knife);
-	kitchen.setDoors(&medical_Office, &dinning_Room, &billard_Room, &lounge);
+	kitchen.init("Kitchen", descript, &knife, 1, 2);
+	kitchen.setDoors(&lounge, &billard_Room, &medical_Office, &dinning_Room);
 	
 	descript = "\n  There is one door in this room. The room gives huge man cave vibes. It even has a pool table; however, it feels unused.\n\n";
-	billard_Room.init("Billard Room", descript, &ball);
+	billard_Room.init("Billard Room", descript, &ball, 2, 2);
 	billard_Room.setDoors(&kitchen);
 	
 	descript = "\n  There are two doors in this room. The center has a massive and extremely fancy dinning table. You hear some erie\n"
@@ -284,13 +309,13 @@ void defineRooms(){
 	      "  get it. Why do maidens care if I'm \"good\" or not? WAAA! I got so good at this game man, so good in fact that I found\n"
 		  "  out where Mildred is. She is always studying texts to figure out how to raise the dead. It just isn't good enough I\n"
 		  "  guess. Now leave me to die in my sorrows.\"\n\n";
-	dinning_Room.init("Dinning Room", descript, npc);
+	dinning_Room.init("Dinning Room", descript, npc, 0, 2);
 	dinning_Room.setDoors(&hall, &kitchen);
 	
 	descript = "\n  There are four doors in this room. This room is basically a expensive living room."
 		   "  You hear some erie music in the background.\n\n";
-	lounge.init("Lounge", descript, &mirror);
-	lounge.setDoors(&kitchen, &hall, &library, &staircase);
+	lounge.init("Lounge", descript, &mirror, 1, 3);
+	lounge.setDoors(&library, &staircase, &kitchen, &hall);
 	
 	descript = "\n  As you head up the staircase you see some writing in craved wood that says \"TURN AROUND NOW! IT NEVER ENDS\"\n"
 		   "  You keep walking up. At this point, it's been a full minute. \"STOP!\" You hear from behind. It's another ghost.\n\n";
@@ -303,29 +328,29 @@ void defineRooms(){
 		  "  place without your body. You need to look at your reflection through Mildred's enchanted reflection device.\n"
 	      "  The only hint we have is \"I'm the bridge between planes of existance; however most of the time people just glance and stare with\n"
 	      "  funny faces.\n I hope you're able to figure it out.\"\n\n";
-	staircase.init("Staircase", descript, npc);
+	staircase.init("Staircase", descript, npc, 2, 3);
 	staircase.setDoors(&lounge);
 	
 	descript = "\n  There are 4 doors in this room. At this point the erie music is very loud. This room looks like a boss fight arena, or the enterance\n"
 		   "  to a very nice mansion. In fact it looks really familiar, however that memory is foggy.\n\n";
-	hall.init("Hall", descript);
-	hall.setDoors(&dinning_Room, &outside, &lounge, &study);
+	hall.init("Hall", descript, 0, 3);
+	hall.setDoors(&study, &lounge, &dinning_Room, &outside);
 	
 	descript = "\n  You've made outside. Congrats!\n\n";
-	outside.init("Freedom (or Outside)", descript);
+	outside.init("Freedom (or Outside)", descript, -1, 3);
 	outside.setDoors(&hall);
 	
 	descript = "\n  There are three doors in this room. At this point the erie music is very loud. On one side there is a window that seems to be cracked,\n"
 		   "  but other than that there are a lot of books.\n\n";
-	library.init("Library", descript, &glass);
-	library.setDoors(&lounge, &study, &bedroom);
+	library.init("Library", descript, &glass, 1, 4);
+	library.setDoors(&bedroom, &lounge, &study);
 	
 	descript = "\n  There are two doors in this room. You see a figure at the desk.\n\n";
-	study.init("Study", descript);
-	study.setDoors(&hall, &library);
+	study.init("Study", descript, 0, 4);
+	study.setDoors(&library, &hall);
 	
 	descript = "\n  There is one door in this room. The music gets a bit quieter. This must be Mildred's Room.";
-	bedroom.init("Bedroom", descript, &watch);
+	bedroom.init("Bedroom", descript, &watch, 2, 4);
 	bedroom.setDoors(&library);
 }
 //*****************spoilers over*******************
@@ -334,7 +359,6 @@ void defineRooms(){
 //used for player navigation thru the game 
 Room *curr;
 Room *currDoor;
-Room *pastDoor;
 
 
 //useful functions for game control
@@ -396,17 +420,15 @@ void clearConsole(){
 void getCommand(){
 	int input;
 	clearConsole();
-	cout << "\nActions (enter number)\n1. open door (asks you to open a door and lets you get a peek inside)\n2. close door\n3. enter current open door\n4. re-display room description"
-	"\n5. use/display item(s)\n6. go back to the previous room\n7. quit\n\nAction: ";
+	cout << "\nActions (enter number)\n1. open door (asks you to open a door and lets you get a peek inside)\n2. enter current open door\n3. re-display room description"
+			"\n4. use/display item(s)\n5. quit\n\nAction: ";
 	cin >> input;
 	switch(input){
 		case 1: openDoor(); break;
-		case 2: closeDoor(); break;
-		case 3: enterDoor(); break;
-		case 4: describe(); break;
-		case 5: itemSelect(); break;
-		case 6: leave(); break;
-		case 7: quit(); break;
+		case 2: enterDoor(); break;
+		case 3: describe(); break;
+		case 4: itemSelect(); break;
+		case 5: quit(); break;
 		default: 
 			cout << "\nNot a valid input\n";
 			waitForPlayer();
@@ -417,7 +439,9 @@ void getCommand(){
 void openDoor(){
 	int input;
 	clearConsole();
-	cout << "Enter the door number you wish to open\n(valid numbers 1 - " << curr->getDoors() << ")\nDoor number: ";
+	cout << "There are doors to the:\n";
+	curr->getDoorsCoords();
+	cout << "Enter the number to the door you wish to open:";
 	cin >> input;
 	if(input >= 1 && input <= curr->getDoors()){
 		curr->p[input-1]->getBasicDescr();
@@ -430,19 +454,10 @@ void openDoor(){
 	}
 }
 
-//closes current open door
-void closeDoor(){
-	currDoor = curr;
-	cout << "\nDoor Closed\n";
-	waitForPlayer();
-}
-
 //enters current open door
 int enterDoor(){
 	clearConsole();
-	pastDoor = curr;
 	curr = currDoor;
-	currDoor = curr;
 	
 	if(curr == &outside){
 		curr->enterRoom();
@@ -493,15 +508,6 @@ void itemSelect(){
 		clearConsole();
 		itemSelect();
 	}
-}
-
-//player leaves current room to go to previous room
-void leave(){
-	clearConsole();
-	curr = pastDoor;
-	currDoor = curr;
-	curr->enterRoom();
-	waitForPlayer();
 }
 
 //player quits the game and program ends
